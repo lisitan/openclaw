@@ -75,18 +75,21 @@ export function createLlmTaskTool(api: OpenClawPluginApi) {
     parameters: Type.Object({
       prompt: Type.String({ description: "Task instruction for the LLM." }),
       input: Type.Optional(
-        Type.Object(
-          {},
-          { description: "Optional input payload for the task.", additionalProperties: true },
+        Type.Union(
+          [
+            Type.Object({}, { additionalProperties: true }),
+            Type.Array(Type.Any()),
+          ],
+          { description: "Optional input payload for the task (object or array)." },
         ),
       ),
       schema: Type.Optional(
-        Type.Object(
-          {},
-          {
-            description: "Optional JSON Schema to validate the returned JSON.",
-            additionalProperties: true,
-          },
+        Type.Union(
+          [
+            Type.Object({}, { additionalProperties: true }),
+            Type.Array(Type.Any()),
+          ],
+          { description: "Optional JSON Schema to validate the returned JSON (object or array)." },
         ),
       ),
       provider: Type.Optional(
