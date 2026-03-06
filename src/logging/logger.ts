@@ -70,7 +70,25 @@ function canUseSilentVitestFileLogFastPath(envLevel: LogLevel | undefined): bool
   );
 }
 
+function getSettingsDateKey(settings: ResolvedSettings): string {
+  // Extract date from rolling log path, or use a fixed key for custom paths
+  const match = settings.file.match(/openclaw-(\d{4}-\d{2}-\d{2})\.log$/);
+  return match ? match[1] : "custom";
+}
+
 function resolveSettings(): ResolvedSettings {
+  // Check if cached settings are stale (date changed) - force re-resolution for daily rotation
+  const cached = loggingState.cachedSettings as ResolvedSettings | null;
+  if (cached) {
+    const cachedDate = getSettingsDateKey(cached);
+    const todayDate = formatLocalDate(new Date());
+    // If date changed (e.g., midnight rollover), force re-resolution
+    if (cachedDate !== "custom" && cachedDate !== todayDate) {
+      loggingState.cachedLogger = null;
+      loggingState.cachedSettings = null;
+    }
+  }
+
   const envLevel = resolveEnvLogLevelOverride();
   // Test runs default file logs to silent. Skip config reads and fallback load in the
   // common case to avoid pulling heavy config/schema stacks on startup.
