@@ -647,12 +647,12 @@ export function renderApp(state: AppViewState) {
                     });
                   }
                 },
-                onSelectFile: (name) => {
+                onSelectFile: (name, agentId) => {
                   state.agentFileActive = name;
-                  if (!resolvedAgentId) {
+                  if (!agentId) {
                     return;
                   }
-                  void loadAgentFileContent(state, resolvedAgentId, name);
+                  void loadAgentFileContent(state, agentId, name);
                 },
                 onFileDraftChange: (name, content) => {
                   state.agentFileDrafts = { ...state.agentFileDrafts, [name]: content };

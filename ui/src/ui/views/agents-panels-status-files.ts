@@ -318,7 +318,7 @@ export function renderAgentFiles(params: {
   agentFileDrafts: Record<string, string>;
   agentFileSaving: boolean;
   onLoadFiles: (agentId: string) => void;
-  onSelectFile: (name: string) => void;
+  onSelectFile: (name: string, agentId: string) => void;
   onFileDraftChange: (name: string, content: string) => void;
   onFileReset: (name: string) => void;
   onFileSave: (name: string) => void;
@@ -372,7 +372,7 @@ export function renderAgentFiles(params: {
                           <div class="muted">No files found.</div>
                         `
                       : files.map((file) =>
-                          renderAgentFileRow(file, active, () => params.onSelectFile(file.name)),
+                          renderAgentFileRow(file, active, () => params.onSelectFile(file.name, params.agentId)),
                         )
                   }
                 </div>
