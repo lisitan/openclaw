@@ -4,7 +4,6 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { writeSkill } from "../skills.e2e-test-helpers.js";
 import { resolveBundledSkillsContext } from "./bundled-context.js";
-import * as skillsModule from "../skills.js";
 
 describe("resolveBundledSkillsContext", () => {
   let tempDir: string;
@@ -25,15 +24,13 @@ describe("resolveBundledSkillsContext", () => {
     // in validateName() function. This test verifies that our fix in bundled-context.ts
     // handles the case where skill.name might be a number type.
 
-    // For now, we use quoted YAML to ensure the skill loads successfully
-    // The real-world scenario where YAML parses unquoted numbers is handled by
-    // the String() coercion in bundled-context.ts
+    // Use unquoted YAML number to trigger numeric type parsing
     const skillDir = path.join(tempDir, "12306");
     await fs.mkdir(skillDir, { recursive: true });
 
-    // Use quoted name to ensure it's parsed as string by YAML
+    // Use unquoted name so YAML parses it as a number
     const skillContent = `---
-name: "12306"
+name: 12306
 description: Test skill with numeric name
 ---
 
@@ -90,7 +87,10 @@ description: Skill with whitespace-only name
       content: "# Test Skill\n\nThis skill has a numeric name.",
     };
 
-    vi.spyOn(skillsModule, "loadSkillsFromDir").mockResolvedValue([mockSkill]);
+    const piCodingAgent = await import("@mariozechner/pi-coding-agent");
+    const loadSkillsFromDirSpy = vi.spyOn(piCodingAgent, "loadSkillsFromDir").mockReturnValue({
+      skills: [mockSkill],
+    });
 
     const context = resolveBundledSkillsContext();
 
@@ -98,6 +98,6 @@ description: Skill with whitespace-only name
     expect(context.names.has("12306")).toBe(true);
     expect(typeof Array.from(context.names)[0]).toBe("string");
 
-    vi.restoreAllMocks();
+    loadSkillsFromDirSpy.mockRestore();
   });
 });
